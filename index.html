@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proof tools</title>
+<meta name="description" content="Eight small open-source tools that check what really happened -- backups, scheduled jobs, CI, dependencies, AI agents, LLM answers, device traffic -- and never report a check they couldn't run as a pass.">
+<style>
+  :root {
+    --bg: #f7f6f2; --panel: #ffffff; --ink: #1b1b19; --muted: #5f5d57; --rule: #e2dfd6;
+    --code-bg: #f0eee8; --pass: #2f6b3a; --fail: #a32d2d; --unv: #8a6a12; --link: #1f4e79;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413; --panel: #1c1c1a; --ink: #ebe8df; --muted: #a29f95; --rule: #2e2d2a;
+      --code-bg: #232320; --pass: #7fc28c; --fail: #ef9a9a; --unv: #e3c46b; --link: #8fb8e0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 64rem; margin: 0 auto; padding: 3.5rem 1rem 4rem; }
+  a { color: var(--link); }
+  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; margin: 0 0 1rem; letter-spacing: -0.02em; }
+  .lede { font-size: 1.15rem; max-width: 42rem; color: var(--muted); margin: 0 0 1.75rem; }
+  .statuses { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin: 0 0 3rem; padding: 0; list-style: none; font-size: .95rem; }
+  .statuses b { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .pass { color: var(--pass); } .fail { color: var(--fail); } .unv { color: var(--unv); }
+  h2 { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 2.5rem 0 .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 29rem), 1fr)); gap: 1rem; }
+  .tool { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 1.2rem 1.25rem 1.1rem; display: flex; flex-direction: column; min-width: 0; }
+  .tool h3 { margin: 0; font: 650 1.2rem/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .tool h3 a { color: inherit; text-decoration: none; }
+  .tool h3 a:hover { text-decoration: underline; }
+  .tool p { margin: .35rem 0 .8rem; color: var(--muted); }
+  pre { margin: 0 0 .9rem; padding: .75rem .85rem; background: var(--code-bg); border-radius: 6px; overflow-x: auto; font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .install { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; font-size: .9rem; }
+  .install code { font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code-bg); padding: .15rem .45rem; border-radius: 4px; }
+  footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .9rem; }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Check what really happened.</h1>
+  <p class="lede">Eight small, open-source command-line tools. Each one takes something that is usually
+    trusted on its word (a backup, a scheduled job, a lockfile, an AI agent's edit, an LLM's answer)
+    and checks it against reality. MIT licensed, on PyPI, tested on Linux, macOS and Windows.</p>
+  <ul class="statuses" aria-label="The three results every tool reports">
+    <li><b class="pass">pass</b>: checked, and it holds</li>
+    <li><b class="fail">fail</b>: checked, and it doesn't</li>
+    <li><b class="unv">unverified</b>: couldn't check, and never counted as a pass</li>
+  </ul>
+
+  <h2>Data and scheduled jobs</h2>
+  <div class="grid">
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/firedrill">firedrill</a></h3>
+      <p>Restores PostgreSQL, MySQL and MariaDB backups into a throwaway, version-matched container and proves the result is usable.</p>
+      <pre>CRITICAL ARCHIVE_TRUNCATED
+  the plain-SQL dump doesn't end with pg_dump's
+  'dump complete' line: it was cut off
+HIGH     SEQUENCE_BEHIND
+  sequence public.customer_id_seq is at 1,
+  behind the largest value of 1774
+
+complete backup: PASS   cut-off backup: FAIL</pre>
+      <div class="install"><code>pip install firedrill</code> <a href="https://maximo000.github.io/firedrill/">docs</a></div>
+    </article>
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/escrow">escrow</a></h3>
+      <p>A dead man's switch for cron jobs, GitHub Actions schedules and systemd timers. Flags silence, not just failure.</p>
+      <pre>[!!] 'nightly-backup' missed its run due
+     2026-11-18 01:00 UTC (0 1 * * *, 30m grace);
+     last pinged 1d ago
+[??] 'weekly-report' has never pinged in</pre>
+      <div class="install"><code>pip install escrow-evidence</code></div>
+    </article>
+  </div>
+
+  <h2>Code and supply chain</h2>
+  <div class="grid">
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/carabiner">carabiner</a></h3>
+      <p>Makes a repository secure by default, ratchets so only new findings fail the build, and proves the controls actually fire.</p>
+      <pre>CRITICAL CI001  .github/workflows/pr.yml
+  job 'hello' runs on pull_request_target and
+  checks out the PR head -- untrusted code runs
+  with your secrets
+
+2 new, 340 accepted (carabiner debt)</pre>
+      <div class="install"><code>pip install carabiner-sec</code> <a href="https://maximo000.github.io/carabiner/">docs</a></div>
+    </article>
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/lockstep">lockstep</a></h3>
+      <p>Does what's installed right now match the lockfile? Python and npm, checked inside the running environment.</p>
+      <pre>[!=] 'click' is pinned to 8.1.8 but 8.1.7 is installed
+[--] 'requests' is pinned to 2.32.3 but is not installed
+[++] 'six' 1.16.0 is installed but not declared anywhere</pre>
+      <div class="install"><code>pip install lockstep-evidence</code></div>
+    </article>
+  </div>
+
+  <h2>AI agents and LLM output</h2>
+  <div class="grid">
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/receipt">receipt</a></h3>
+      <p>A tamper-evident receipt for what a command or an AI coding agent (Claude Code, Codex, Cursor) actually changed on disk.</p>
+      <pre>$ receipt run --declare app/auth.py -- python fix.py
+[FAIL] touched 1 undeclared file(s): app/payments.py</pre>
+      <div class="install"><code>pip install receipt-evidence</code></div>
+    </article>
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/sourced">sourced</a></h3>
+      <p>Checks an LLM's answer against its own sources, claim by claim. Measured on RAGTruth's 20,261 test sentences.</p>
+      <pre>[OK] Microsoft reported revenue of $56 billion.
+[XX] Microsoft grew 40% year over year.
+       claims 40% near 'Microsoft', but the source's own
+       text near that entity says ['56 billion', '8%']</pre>
+      <div class="install"><code>pip install sourced-evidence</code></div>
+    </article>
+  </div>
+
+  <h2>Devices and reading</h2>
+  <div class="grid">
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/drift">drift</a></h3>
+      <p>Does a device's real network traffic match what it's allowed to contact? Checked against a packet capture or Zeek logs.</p>
+      <pre>[XX] 145.254.160.237: 'test workstation' contacted domain(s)
+     outside its declared allow-list: pagead2.googlesyndication.com</pre>
+      <div class="install"><code>pip install drift-evidence</code></div>
+    </article>
+    <article class="tool">
+      <h3><a href="https://github.com/MaXiMo000/satchel">satchel</a></h3>
+      <p>A local-first reading archive: saves the article text, not just the link, with offline full-text search and a browser extension.</p>
+      <pre>$ satchel add https://example.com/some-article
+saved #4: Why Local-First Software Is Worth the Extra Effort
+
+$ satchel search "FTS5"
+#4    Why Local-First Software Is Worth the Extra Effort</pre>
+      <div class="install"><code>pip install satchel-reader</code></div>
+    </article>
+  </div>
+
+  <footer>
+    All output above is from real runs, trimmed to fit. Source, issues and security policies are in each repository.
+    &middot; <a href="https://github.com/MaXiMo000">github.com/MaXiMo000</a>
+  </footer>
+</main>
+</body>
+</html>
