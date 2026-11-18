@@ -8,7 +8,7 @@ AI coding agents, LLM answers, device traffic and saved reading.
 
 | Tool | Checks | Install |
 |---|---|---|
-| [firedrill](https://github.com/MaXiMo000/firedrill) | a database backup restores and is usable | `pip install firedrill` |
+| [firedrill](https://github.com/MaXiMo000/firedrill) | a Postgres, MySQL, MariaDB or SQLite backup restores and is usable | `pip install firedrill` |
 | [escrow](https://github.com/MaXiMo000/escrow) | scheduled jobs are still running | `pip install escrow-evidence` |
 | [carabiner](https://github.com/MaXiMo000/carabiner) | a repository's security controls exist and fire | `pip install carabiner-sec` |
 | [lockstep](https://github.com/MaXiMo000/lockstep) | what's installed matches the lockfile | `pip install lockstep-evidence` |
